@@ -11,9 +11,9 @@ model = load("logregressionmodel.joblib")
 def extract_features_efficient(data):
     # Define aggregation mappings for features
     agg_map = {
-        'Linear Acceleration x (m/s^2)': ['mean', 'std', 'var', 'max', 'min'],
-        'Linear Acceleration y (m/s^2)': ['mean', 'std', 'var', 'max', 'min'],
-        'Linear Acceleration z (m/s^2)': ['mean', 'std', 'var', 'max', 'min'],
+        'Acceleration x (m/s^2)': ['mean', 'std', 'var', 'max', 'min'],
+        'Acceleration y (m/s^2)': ['mean', 'std', 'var', 'max', 'min'],
+        'Acceleration z (m/s^2)': ['mean', 'std', 'var', 'max', 'min'],
         'Absolute acceleration (m/s^2)': ['mean', 'std', 'var', 'max', 'min']
     }
 

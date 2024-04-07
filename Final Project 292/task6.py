@@ -21,14 +21,10 @@ combinedTrainingDF = pd.concat([trainingDataWalk, trainingDataJump], ignore_inde
 combinedTestingDF = pd.concat([testingDataWalk, testingDataJump], ignore_index=True)
 
 # iloc is indexing
-# Starting from 1 to the second last one
-#trainData = combinedTrainingDF.iloc[:, -1]
+
 
 # Removes the label
 trainLabel = combinedTrainingDF.iloc[:, -1]
-
-# Starting from 1 to the second last one
-#testData = combinedTestingDF.iloc[:, -1]
 
 # Removes the label
 testLabel = combinedTestingDF.iloc[:, -1]
@@ -66,4 +62,4 @@ plt.show()
 #print('The AUC is: ', auc)
 
 # Saves the classifier
-joblib.dump(clf, 'logregressionmodel.joblib')
+joblib.dump(clf, 'logregressionmodel.plk')

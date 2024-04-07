@@ -23,7 +23,7 @@ filterWalking = noiseFiltering('./everyone walking/all walking.csv')
 
 filterJumping = noiseFiltering('./everyone jumping/all jumping.csv')
 
-
+# Task 5
 def features(df):
     segment_length = 500 # Process every 500 data points every 5 Seconds
 
@@ -37,17 +37,6 @@ def features(df):
             # Calculate features for each column
             segment = df.iloc[start_index:start_index + segment_length, i]
 
-            ''''
-            segment_features[f'mean {col_name}'] = segment.iloc[:, i].mean()
-            segment_features[f'max {col_name}'] = segment.iloc[:, i].max()
-            segment_features[f'min {col_name}'] = segment.iloc[:, i].min()
-            segment_features[f'median {col_name}'] = segment.iloc[:, i].median()
-            segment_features[f'std {col_name}'] = segment.iloc[:, i].std()
-            segment_features[f'skew {col_name}'] = segment.iloc[:, i].skew()
-            segment_features[f'kurtosis {col_name}'] = segment.iloc[:, i].kurt()
-            segment_features[f'variance {col_name}'] = segment.iloc[:, i].var()
-            segment_features[f'sum {col_name}'] = segment.iloc[:, i].sum()
-            '''
             segment_features[f'mean {col_name}'] = segment.mean()
             segment_features[f'max {col_name}'] = segment.max()
             segment_features[f'min {col_name}'] = segment.min()
@@ -90,17 +79,6 @@ def normalize(df, outputFile, labelValues):
 
     df_new.to_csv(outputFile, index=False)
 
-    '''
-    sc = preprocessing.StandardScaler().fit(df)
-
-    df1 = sc.transform(df)
-
-    df_new = pd.DataFrame(df1, columns= df.columns)
-
-    df_new['label'] = labelValues
-
-    df.to_csv(outputFile, index=False)
-    '''
 
 
 normalize(jumpingFeatures,

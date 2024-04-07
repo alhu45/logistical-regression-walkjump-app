@@ -61,16 +61,6 @@ def shuffleData(inputFile, outputFile):
     mapping = dict(zip(uniqueWindows, shuffledWindows))
     shuffled_Data['window'] = shuffled_Data['window'].map(mapping)
 
-    '''
-    grouped = shuffled_Data.groupby('window')
-    shuffled_groups = []
-    for window, group in grouped:
-        shuffled_group = group.sample(frac=1).reset_index(drop=True)
-        shuffled_groups.append(shuffled_group)
-    
-    shuffled_Data = pd.concat(shuffled_groups).reset_index(drop=True)
-    '''
-
     #Sorts the windows corresponding to its row
     shuffled_Data.sort_values(['window', 'Time (s)'], axis=0, ascending=[True, True], inplace=True)
 
