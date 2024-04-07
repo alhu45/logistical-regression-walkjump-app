@@ -113,7 +113,7 @@ readLineData('./kai jumping/kai jumping.csv', 'Jumping', 'Kai', 'yellow')
 y = np.array([16.67, 16.67, 16.67, 16.67, 16.67, 16.67])
 
 # Labels for each section
-labels = ['Walking with Phone in Right Pocket', 'Walking with Phone in Arm Band', 'Walking with Phone in Left Hand', 'Jumping with Phone in Right Pocket', 'Jumping with Phone in Arm Band', 'Jumping with Phone in Left Hand']
+labels = ['Walking: Right Pocket', 'Walking: Waistband', 'Walking: Left Hand', 'Jumping: Right Pocket', 'Jumping: Waistband', 'Jumping: Left Hand']
 
 # Adding a title
 plt.title('Meta Data: Distribution of Phone Positions During Walking and Jumping')

@@ -1,10 +1,40 @@
 from tkinter import *
 from tkinter import filedialog
 
-def import_file():
+import pandas as pd
+from sklearn import preprocessing
+
+from task4and5 import noiseFiltering, features, normalize
+from joblib import load
+
+model = load("logregressionmodel.joblib")
+def importFile():
     file_path = filedialog.askopenfilename(title="Select a file", filetypes=[("CSV files", "*.csv"), ("All files", "*.*")])
-    if file_path:
-        print("Selected file:", file_path)
+    return file_path
+
+def normalize(df):
+
+    # Does preprocessing using standard scaler
+    sc = preprocessing.StandardScaler()
+
+    # Transform into numPy array
+    df_transform = sc.fit_transform(df)
+
+    # Changes back panda dataframe
+    df_new = pd.DataFrame(df_transform)
+
+    return normalize
+
+def output():
+    filepath = importFile()
+
+    filteredData = noiseFiltering(filepath)
+
+    filteredFeatures = features(filteredData)
+
+    normalize(filteredFeatures)
+
+
 
 window = Tk()
 
@@ -19,8 +49,12 @@ mainLabel = Label(window, text="Ready to predict whether you are Walking or Jump
 mainLabel.pack(pady=20)
 
 # Button to select file
-selectFile = Button(window, text="Select Input File", command=import_file)
+selectFile = Button(window, text="Select Input File", command=importFile)
 selectFile.pack(pady=20)
+
+
+
+
 
 # Run the Tkinter event loop
 window.mainloop()
