@@ -1,91 +1,117 @@
-from tkinter import Tk, Button
-from tkinter import filedialog
-from tkinter.filedialog import askopenfilename
+from tkinter import *
+from tkinter import filedialog, messagebox
+from PIL import Image, ImageTk
 import pandas as pd
-from joblib import load
+from matplotlib import pyplot as plt
 from sklearn import preprocessing
 
-model = load("logregressionmodel.joblib")
+from joblib import load
 
+def noiseFiltering(inputFile):
 
-def reduce_noise_and_normalize(indf):
+    # Removes the first and last column of the data frame
+    data = inputFile.iloc[:, 1:]
+
     window_size = 5
-    data = indf
-    timestamps = data.iloc[:, 0]
-    data = data.iloc[:, 1:]
-    filtered_data = data.rolling(window=window_size, min_periods=1).mean()
-    sc = preprocessing.StandardScaler()
-    normalized_data = sc.fit_transform(filtered_data)
-    normalized_df = pd.DataFrame(normalized_data, columns=data.columns)
+    sma5 = data.rolling(window_size).mean()
 
-    final_df = pd.concat([timestamps, normalized_df], axis=1)
-    final_df = final_df.dropna()
-    return final_df
+    sma5 = sma5.dropna()
+
+    return sma5
 
 
-def extract_features_and_normalize(indf):
-    window_size = 5
-    data = indf
-    # labels = data.iloc[:, -2]
-    features = pd.DataFrame()
+def features_normalize(df):
+    segment_length = 500 # Process every 500 data points every 5 Seconds
 
-    for i in range(1, data.shape[1]):
-        column_features = pd.DataFrame()
-        column_features[f'mean.{i}'] = data.iloc[:, i].rolling(window=window_size, min_periods=1).mean()
-        column_features[f'std.{i}'] = data.iloc[:, i].rolling(window=window_size, min_periods=1).std()
-        column_features[f'max.{i}'] = data.iloc[:, i].rolling(window=window_size, min_periods=1).max()
-        column_features[f'min.{i}'] = data.iloc[:, i].rolling(window=window_size, min_periods=1).min()
-        column_features[f'kurtosis.{i}'] = data.iloc[:, i].rolling(window=window_size, min_periods=1).kurt()
-        column_features[f'skew.{i}'] = data.iloc[:, i].rolling(window=window_size, min_periods=1).skew()
-        column_features[f'range.{i}'] = column_features[f'max.{i}'] - column_features[f'min.{i}']
-        column_features[f'variance.{i}'] = data.iloc[:, i].rolling(window=window_size, min_periods=1).var()
-        column_features[f'median.{i}'] = data.iloc[:, i].rolling(window=window_size, min_periods=1).median()
-        column_features[f'Sum.{i}'] = data.iloc[:, i].rolling(window=window_size, min_periods=1).sum()
-        column_features[f'Standard Error.{i}'] = data.iloc[:, i].rolling(window=window_size, min_periods=1).sem()
-        column_features[f'Exponential Moving Average.{i}'] = data.iloc[:, i].ewm(span=window_size).mean()
-        features = pd.concat([features, column_features], axis=1)
+    # Empty list to hold features
+    features = []
 
-    # Normalize the features using z-score normalization
-    normalized_features = (features - features.mean()) / features.std()
-    # final_data = pd.concat([normalized_features, labels.reset_index(drop=True)], axis=1)
-    final_data = normalized_features.dropna()
-    final_data.to_csv('./data to be tested/inputted data.csv')
+    for start_index in range(0, len(df), segment_length):
+        segment_features = {}
 
-    return final_data
+        for i, col_name in enumerate(['x', 'y', 'z', 'absolute']):
+            # Calculate features for each column
+            segment = df.iloc[start_index:start_index + segment_length, i]
 
+            segment_features[f'mean {col_name}'] = segment.mean()
+            segment_features[f'max {col_name}'] = segment.max()
+            segment_features[f'min {col_name}'] = segment.min()
+            segment_features[f'median {col_name}'] = segment.median()
+            segment_features[f'std {col_name}'] = segment.std()
+            segment_features[f'skew {col_name}'] = segment.skew()
+            segment_features[f'kurtosis {col_name}'] = segment.kurt()
+            segment_features[f'variance {col_name}'] = segment.var()
+            segment_features[f'sum {col_name}'] = segment.sum()
+
+            # Append the features of this segment to the features list
+            features.append(segment_features)
+
+
+    #Make the feature list into a dataframe
+    features_df = pd.DataFrame(features)
+    features_df = features_df.dropna()
+
+    # Does preprocessing using standard scaler
+    # i changed this from StandardScaler to RobustScler
+    sc = preprocessing.RobustScaler()
+    # Transform into numPy array
+    df_transform = sc.fit_transform(features_df)
+    # Changes back panda dataframe
+    df_new = pd.DataFrame(df_transform, columns=features_df.columns)
+
+    # features_df.to_csv('./data to be tested/inputted data.csv')
+
+    return df_new
 
 def process_data(df):
     # process provided file
-    df = reduce_noise_and_normalize(df)
-    df = extract_features_and_normalize(df)
+    df = noiseFiltering(df)
+
+    df = features_normalize(df)
+
+    print(df)
 
     # Use the model to predict the labels
     df = model.predict(df)
+
     predictions_df = pd.DataFrame(df, columns=['Predictions'])
     predictions_df.to_csv("./data to be tested/labelled inputted data.csv", index=False)
 
     return df
 
 
-def open_csv_file():
+def importFile():
     filepath = filedialog.askopenfilename(filetypes=[("CSV Files", "*.csv")])
     if filepath:
-        # Now you can use the selected CSV file path
+        # If a file is selected, process it
         print(f"Selected file: {filepath}")
+        df = pd.read_csv(filepath)
+        df = process_data(df)
     else:
+        # If no file is selected, print a message
         print("No file was selected")
-    df = pd.read_csv(filepath)
-    df = process_data(df)
 
-    # Save the DataFrame to a new CSV file
-    # df.to_csv('C:/Users/Simon/Downloads/Year_2/sem2/ELEC_292/Assignment/labeledInputData.csv', index=False)
+model = load("logregressionmodel.plk")
 
+window = Tk()
+window.title("Welcome to the Walking or Jumping Predictor")
+window.configure(bg='#424242')
+window.geometry('1000x1000')
 
-box = Tk()
-box.geometry("800x600")  # Set window size
+# Load and display the image
+image_path = "/Users/Ryan/Desktop/Screenshot 2024-04-07 at 3.55.11 PM.png"
+img = Image.open(image_path)
+img = img.resize((500, 500), Image.Resampling.LANCZOS)
+photoImg = ImageTk.PhotoImage(img)
+imgLabel = Label(window, image=photoImg, bg='black')
+imgLabel.pack(pady=20)
 
-# Create a button that calls 'open_csv_file' when clicked
-b = Button(box, text="Open CSV File", command=open_csv_file)
-b.place(x=375, y=250)
+mainLabel = Label(window, text="Ready to predict whether you are Walking or Jumping?",
+                  font=("Times New Roman", 15, "bold"), bg='lightgrey', fg='black')
+mainLabel.pack(pady=20)
 
-box.mainloop()
+selectFile = Button(window, text="Select Input File", command=importFile)
+selectFile.pack(pady=20)
+
+window.mainloop()
+
